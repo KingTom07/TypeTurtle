@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leaderboard - TypeTurtle</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="topnav">
+    <div class="navlinks">
+      <a href="index.htm">Home</a>
+      <a href="leaderboard.html" class="active">Leaderboard</a>
+      <a href="login.html">Login / Register</a>
+      <a href="faq.html">F&Qs</a>
+    </div>
+  </div>
+
+  <div class="leaderboard-section">
+    <h2>🏆 Leaderboard</h2>
+
+    <div style="margin-bottom: 1rem;">
+      <input type="text" id="usernameFilter" placeholder="Filter by username" />
+      <button onclick="loadScores()">Search</button>
+    </div>
+
+    <table border="1" cellspacing="0" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Game Mode</th>
+          <th>WPM</th>
+          <th>Accuracy (%)</th>
+          <th>Played At</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+        <tr><td colspan="5">Loading scores...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="footer">
+    <p>© 2025 TypeTurtle — Built by <a href="https://github.com/KingTom07" target="_blank">KingTom07 🐢</a></p>
+  </footer>
+
+  <script>
+    function loadScores() {
+      const username = document.getElementById("usernameFilter").value.trim();
+      const url = username ? \`backend/get_scores.php?user=\${encodeURIComponent(username)}\` : "backend/get_scores.php";
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.getElementById("leaderboard-body");
+          tbody.innerHTML = "";
+          if (data.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5'>No scores found.</td></tr>";
+            return;
+          }
+          data.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${row.username}</td>
+              <td>${row.game_mode}</td>
+              <td>${row.wpm}</td>
+              <td>${row.accuracy}</td>
+              <td>${row.played_at}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          document.getElementById("leaderboard-body").innerHTML = "<tr><td colspan='5'>Failed to load scores.</td></tr>";
+          console.error("Leaderboard error:", err);
+        });
+    }
+
+    // Load on page load
+    window.onload = loadScores;
+  </script>
+</body>
+</html>
